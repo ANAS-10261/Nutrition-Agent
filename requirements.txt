@@ -1,0 +1,17 @@
+# IBM Watsonx.ai — Nutrition Agent
+# Python dependencies
+
+# Web framework
+Flask==3.0.3
+flask-cors==4.0.1
+
+# Environment variables
+python-dotenv==1.0.1
+
+# IBM Watsonx.ai SDK (use latest compatible versions for Python 3.13)
+ibm-watsonx-ai>=1.1.2
+ibm-cloud-sdk-core>=3.22.0
+
+# Utilities
+requests==2.32.3
+gunicorn==22.0.0
