@@ -1,0 +1,33 @@
+{
+  "name": "NutriBot - AI Nutrition Agent",
+  "description": "A Flask nutrition assistant powered by IBM Watsonx.ai and Granite models.",
+  "keywords": ["python", "flask", "watsonx", "nutrition", "ai"],
+  "repository": "",
+  "website": "",
+  "stack": "heroku-24",
+  "env": {
+    "FLASK_SECRET_KEY": {
+      "description": "Random secret used by Flask sessions.",
+      "generator": "secret"
+    },
+    "IBM_API_KEY": {
+      "description": "IBM Cloud API key for Watsonx.ai access."
+    },
+    "IBM_PROJECT_ID": {
+      "description": "IBM Watsonx.ai project ID."
+    },
+    "IBM_URL": {
+      "description": "IBM Watsonx.ai base URL.",
+      "value": "https://us-south.ml.cloud.ibm.com"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  },
+  "scripts": {
+    "postdeploy": "echo 'NutriBot app.json deployment manifest ready'"
+  }
+}
