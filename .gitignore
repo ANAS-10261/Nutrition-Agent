@@ -1,0 +1,46 @@
+# -- Secrets -------------------------------------------------------------------
+.env
+
+# -- Python --------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy / pyright
+.mypy_cache/
+.pyright/
+
+# -- OS ------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -- Editors -------------------------------------------------------------------
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# -- Misc ----------------------------------------------------------------------
+*.log
+*.tmp
