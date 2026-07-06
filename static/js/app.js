@@ -1,571 +1,687 @@
-/* ─────────────────────────────────────────────────────────────────────────────
-   Fitness Buddy · app.js
-   IBM Watsonx.ai — AI Fitness Coach
-───────────────────────────────────────────────────────────────────────────── */
+/**
+ * NutriBot — AI Nutrition Agent
+ * Main JavaScript  ·  app.js
+ */
 
-/* ── State ──────────────────────────────────────────────────────────────── */
+/* ── State ──────────────────────────────────────────────── */
 const state = {
-  chatHistory: [],
-  userProfile: null,
-  familyMembers: [],
-  currentTab: 'chat',
-}
+  chatHistory:    [],
+  userProfile:    null,
+  familyMembers:  [],
+  currentTab:     'chat',
+  isTyping:       false,
+};
 
-const $ = id => document.getElementById(id)
+/* ── DOM Refs ────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
 
-/* ── Boot ───────────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════
+   INIT
+   ════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  initTheme()
-  initSidebar()
-  initTabs()
-  initChat()
-  initDashboard()
-  initWorkout()
-  initNutrition()
-  initHabits()
-  initBMI()
-  checkAgentStatus()
-})
+  initTheme();
+  initTabs();
+  initChat();
+  initBMI();
+  initFamilyProfiles();
+  initFoodAnalyzer();
+  initMealPlanner();
+  initDashboard();
+  checkAgentStatus();
+  initSidebar();
+});
 
-/* ── Theme ──────────────────────────────────────────────────────────────── */
+/* ── Theme ────────────────────────────────────────────── */
 function initTheme() {
-  const saved = localStorage.getItem('fb-theme') || 'light'
-  document.documentElement.setAttribute('data-theme', saved)
-  updateThemeIcons(saved)
+  const saved = localStorage.getItem('nutribot-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeIcons(saved);
 
-  ;[$('themeToggle'), $('themeToggleMobile')].forEach(btn => {
-    if (!btn) return
-    btn.addEventListener('click', () => {
-      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
-      document.documentElement.setAttribute('data-theme', next)
-      localStorage.setItem('fb-theme', next)
-      updateThemeIcons(next)
-    })
-  })
+  const toggleFn = () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('nutribot-theme', next);
+    updateThemeIcons(next);
+  };
+  $('themeToggle').addEventListener('click', toggleFn);
+  const mob = $('themeToggleMobile');
+  if (mob) mob.addEventListener('click', toggleFn);
 }
 
 function updateThemeIcons(theme) {
-  const icon = theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'
-  document.querySelectorAll('.btn-theme-toggle i').forEach(i => {
-    i.className = `bi ${icon}`
-  })
+  const icon = theme === 'dark'
+    ? '<i class="bi bi-sun-fill"></i>'
+    : '<i class="bi bi-moon-stars-fill"></i>';
+  $('themeToggle').innerHTML = icon;
+  const mob = $('themeToggleMobile');
+  if (mob) mob.innerHTML = icon;
 }
 
-/* ── Sidebar ────────────────────────────────────────────────────────────── */
+/* ── Sidebar (mobile) ────────────────────────────────── */
 function initSidebar() {
-  const sidebar  = $('sidebar')
-  const toggle   = $('sidebarToggle')
-  let overlay    = document.querySelector('.sidebar-overlay')
+  const sidebar  = document.getElementById('sidebar');
+  const toggle   = $('sidebarToggle');
+  if (!toggle) return;
 
-  if (!overlay) {
-    overlay = document.createElement('div')
-    overlay.className = 'sidebar-overlay'
-    document.body.appendChild(overlay)
-  }
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  document.body.appendChild(overlay);
 
-  const open  = () => { sidebar.classList.add('open');  overlay.classList.add('show') }
-  const close = () => { sidebar.classList.remove('open'); overlay.classList.remove('show') }
-
-  toggle?.addEventListener('click', open)
-  overlay.addEventListener('click', close)
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+  });
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('show');
+  });
 }
 
-/* ── Tabs ───────────────────────────────────────────────────────────────── */
+/* ── Tabs ─────────────────────────────────────────────── */
 function initTabs() {
-  document.querySelectorAll('.nav-link[data-tab]').forEach(link => {
+  document.querySelectorAll('[data-tab]').forEach(link => {
     link.addEventListener('click', e => {
-      e.preventDefault()
-      switchTab(link.dataset.tab)
-      // close mobile sidebar
-      document.getElementById('sidebar').classList.remove('open')
-      document.querySelector('.sidebar-overlay')?.classList.remove('show')
-    })
-  })
+      e.preventDefault();
+      switchTab(link.dataset.tab);
+
+      // Close mobile sidebar
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.querySelector('.sidebar-overlay');
+      if (sidebar && overlay) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+      }
+    });
+  });
 }
 
 function switchTab(tabId) {
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'))
-  document.querySelectorAll('.nav-link[data-tab]').forEach(l => l.classList.remove('active'))
-  const pane = $(`tab-${tabId}`)
-  if (pane) pane.classList.add('active')
-  document.querySelector(`.nav-link[data-tab="${tabId}"]`)?.classList.add('active')
-  state.currentTab = tabId
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('[data-tab]').forEach(l => l.classList.remove('active'));
+
+  const pane = $(`tab-${tabId}`);
+  if (pane) pane.classList.add('active');
+
+  document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(l => l.classList.add('active'));
+  state.currentTab = tabId;
 }
 
-/* ── Agent status ───────────────────────────────────────────────────────── */
+/* ── Agent status check ──────────────────────────────── */
 async function checkAgentStatus() {
-  const dot  = $('connectionStatus').querySelector('.status-dot')
-  const text = $('connectionStatus').querySelector('.status-text')
   try {
-    const res  = await fetch('/api/health-check')
-    const data = await res.json()
+    const res  = await fetch('/api/health-check');
+    const data = await res.json();
+    const dot  = document.querySelector('.status-dot');
+    const txt  = document.querySelector('.status-text');
+
     if (data.watsonx_connected) {
-      dot.classList.add('connected')
-      text.textContent = 'Watsonx Connected'
+      dot.classList.add('connected');
+      if (txt) txt.textContent = 'Watsonx.ai ✓';
     } else {
-      text.textContent = 'Demo Mode'
+      dot.classList.add('error');
+      if (txt) txt.textContent = 'Demo mode';
     }
-    if (data.agent) $('agentNameDisplay').textContent = data.agent
+
+    // Update agent name
+    if (data.agent) {
+      const el = $('agentNameDisplay');
+      if (el) el.textContent = data.agent;
+    }
   } catch {
-    dot.classList.add('error')
-    text.textContent = 'Offline'
+    const dot = document.querySelector('.status-dot');
+    if (dot) dot.classList.add('error');
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    CHAT
-══════════════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════ */
 function initChat() {
-  $('sendBtn').addEventListener('click', sendMessage)
-  $('clearChatBtn').addEventListener('click', () => {
-    $('chatMessages').innerHTML = ''
-    state.chatHistory = []
-    showToast('Conversation cleared', 'info')
-  })
+  const input   = $('chatInput');
+  const sendBtn = $('sendBtn');
 
-  const input = $('chatInput')
+  sendBtn.addEventListener('click', sendMessage);
   input.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
-  })
-  input.addEventListener('input', () => {
-    input.style.height = 'auto'
-    input.style.height = Math.min(input.scrollHeight, 120) + 'px'
-  })
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
 
+  // Auto-resize textarea
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+
+  // Quick prompts
   document.querySelectorAll('.quick-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      input.value = btn.dataset.prompt
-      sendMessage()
-      $('quickPrompts').style.display = 'none'
-    })
-  })
+      input.value = btn.dataset.prompt;
+      sendMessage();
+    });
+  });
+
+  // Clear chat
+  $('clearChatBtn').addEventListener('click', () => {
+    const msgs = $('chatMessages');
+    msgs.innerHTML = '';
+    state.chatHistory = [];
+    addBotMessage('Chat cleared! How can I help you? 🥗');
+    showToast('Conversation cleared', 'success');
+  });
 }
 
 async function sendMessage() {
-  const input = $('chatInput')
-  const text  = input.value.trim()
-  if (!text) return
+  const input = $('chatInput');
+  const text  = input.value.trim();
+  if (!text || state.isTyping) return;
 
-  addUserMessage(text)
-  input.value = ''
-  input.style.height = 'auto'
-  $('sendBtn').disabled = true
-  $('quickPrompts').style.display = 'none'
+  input.value = '';
+  input.style.height = 'auto';
 
-  const typing = showTypingIndicator()
+  // Hide quick prompts on first message
+  const qp = $('quickPrompts');
+  if (qp) qp.style.display = 'none';
+
+  addUserMessage(text);
+  showTypingIndicator();
+  state.isTyping = true;
+  $('sendBtn').disabled = true;
 
   try {
-    const res  = await fetch('/api/chat', {
-      method: 'POST',
+    const res = await fetch('/api/chat', {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: text,
         profile: state.userProfile,
         history: state.chatHistory,
       }),
-    })
-    const data = await res.json()
-    removeTypingIndicator(typing)
+    });
+    const data = await res.json();
+
+    removeTypingIndicator();
 
     if (data.error) {
-      addBotMessage(`⚠️ ${data.error}`, now())
+      addBotMessage('⚠️ ' + data.error);
     } else {
-      addBotMessage(data.response, data.timestamp)
-      state.chatHistory.push({ user: text, assistant: data.response })
-      if (state.chatHistory.length > 20) state.chatHistory.shift()
+      addBotMessage(data.response, data.timestamp);
+      state.chatHistory.push({ user: text, assistant: data.response });
+      if (state.chatHistory.length > 20) state.chatHistory.shift();
     }
   } catch (err) {
-    removeTypingIndicator(typing)
-    addBotMessage('⚠️ Network error. Please check your connection.', now())
+    removeTypingIndicator();
+    addBotMessage('⚠️ Network error. Please check your connection and try again.');
+  } finally {
+    state.isTyping = false;
+    $('sendBtn').disabled = false;
+    $('chatInput').focus();
   }
-
-  $('sendBtn').disabled = false
 }
 
 function addUserMessage(text) {
-  const div = document.createElement('div')
-  div.className = 'message user-message'
+  const msgs = $('chatMessages');
+  const div  = document.createElement('div');
+  div.className = 'message user-message';
   div.innerHTML = `
-    <div class="msg-avatar">🧑</div>
+    <div class="msg-avatar">👤</div>
     <div>
       <div class="msg-bubble">${escapeHtml(text)}</div>
       <div class="msg-time">${now()}</div>
-    </div>`
-  $('chatMessages').appendChild(div)
-  scrollChat()
+    </div>`;
+  msgs.appendChild(div);
+  scrollChat();
 }
 
 function addBotMessage(text, time) {
-  const div = document.createElement('div')
-  div.className = 'message bot-message'
+  const msgs = $('chatMessages');
+  const div  = document.createElement('div');
+  div.className = 'message bot-message';
   div.innerHTML = `
     <div class="msg-avatar">🤖</div>
     <div>
       <div class="msg-bubble">${formatMarkdown(text)}</div>
       <div class="msg-time">${time || now()}</div>
-    </div>`
-  $('chatMessages').appendChild(div)
-  scrollChat()
+    </div>`;
+  msgs.appendChild(div);
+  scrollChat();
 }
 
 function showTypingIndicator() {
-  const div = document.createElement('div')
-  div.className = 'message bot-message typing-indicator'
+  const msgs = $('chatMessages');
+  const div  = document.createElement('div');
+  div.id = 'typingIndicator';
+  div.className = 'message bot-message typing-indicator';
   div.innerHTML = `
     <div class="msg-avatar">🤖</div>
     <div class="msg-bubble">
-      <span class="typing-dot"></span>
-      <span class="typing-dot"></span>
-      <span class="typing-dot"></span>
-    </div>`
-  $('chatMessages').appendChild(div)
-  scrollChat()
-  return div
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollChat();
 }
 
-function removeTypingIndicator(el) { el?.remove() }
+function removeTypingIndicator() {
+  const el = $('typingIndicator');
+  if (el) el.remove();
+}
+
 function scrollChat() {
-  const c = $('chatMessages')
-  c.scrollTop = c.scrollHeight
+  const msgs = $('chatMessages');
+  msgs.scrollTop = msgs.scrollHeight;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    DASHBOARD
-══════════════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════ */
 function initDashboard() {
-  $('saveProfileBtn').addEventListener('click', saveProfile)
-  $('refreshMotivation').addEventListener('click', loadMotivation)
-  loadMotivation()
-}
-
-async function loadMotivation() {
-  const el = $('motivationText')
-  el.textContent = 'Loading your daily fitness inspiration…'
-  try {
-    const res  = await fetch('/api/motivation')
-    const data = await res.json()
-    el.innerHTML = formatMarkdown(data.motivation || 'Stay consistent — every rep counts! 💪')
-  } catch {
-    el.textContent = '💪 "Every workout is a step closer to your goals. Keep going!"'
-  }
+  $('saveProfileBtn').addEventListener('click', saveProfile);
 }
 
 function saveProfile() {
-  const name   = $('profileName').value.trim()
-  const age    = parseInt($('profileAge').value)
-  const gender = $('profileGender').value
-  const weight = parseFloat($('profileWeight').value)
-  const height = parseFloat($('profileHeight').value)
-  const goal   = $('profileGoal').value
-  const level  = $('profileFitnessLevel').value
-  const equip  = $('profileEquipment').value
-  const time   = parseInt($('profileTime').value) || 30
+  const name    = $('profileName').value.trim();
+  const age     = parseInt($('profileAge').value);
+  const gender  = $('profileGender').value;
+  const weight  = parseFloat($('profileWeight').value);
+  const height  = parseFloat($('profileHeight').value);
+  const goal    = $('profileGoal').value;
+  const diet    = $('profileDiet').value;
+  const allerg  = $('profileAllergies').value.trim();
 
   if (!name || !age || !weight || !height) {
-    showToast('Please fill in all required fields', 'warning')
-    return
+    showToast('Please fill in all required fields', 'warning');
+    return;
   }
 
-  state.userProfile = { name, age, gender, weight, height, goal, fitness_level: level, equipment: equip, time_available: time }
-  showToast(`Profile saved for ${name}! 💪`, 'success')
-  calcAndShowStats(weight, height, age, gender, 'moderate', goal)
+  state.userProfile = { name, age, gender, weight, height, goal, diet_type: diet, allergies: allerg };
+
+  // Calculate and display stats
+  calcAndShowStats(weight, height, age, gender, 'moderate', goal);
+  showToast(`Profile saved for ${name}! 🎉`, 'success');
 }
 
 async function calcAndShowStats(weight, height, age, gender, activity, goal) {
   try {
     const res  = await fetch('/api/bmi', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ weight, height, age, gender, activity, goal }),
-    })
-    const d = await res.json()
-    if (d.error) return
+    });
+    const data = await res.json();
 
-    $('statBmi').textContent    = d.bmi
-    $('statBmiCat').textContent = d.category
-    $('statTdee').textContent   = d.tdee
-    $('statProtein').textContent = d.protein_g + 'g'
-    $('statWater').textContent  = (weight * 0.033).toFixed(1) + 'L'
+    $('statBmi').textContent    = data.bmi;
+    $('statBmiCat').textContent = data.category;
+    $('statBmiCat').style.color = data.color;
+    $('statTdee').textContent   = data.tdee.toLocaleString();
+    $('statProtein').textContent = data.protein_g + 'g';
+    $('statWater').textContent  = (Math.round(weight * 0.033 * 10) / 10) + 'L';
 
-    $('statsRow').style.removeProperty('display')
-    $('macroSection').style.removeProperty('display')
+    $('statsRow').style.removeProperty('display');
+    $('macroSection').style.removeProperty('display');
 
-    renderMacroBars(d.protein_g, d.carbs_g, d.fat_g, d.tdee)
-    renderCalorieRings(d.tdee, d.weight_loss, d.weight_gain)
-  } catch {}
+    renderMacroBars(data.protein_g, data.carbs_g, data.fat_g, data.tdee);
+    renderCalorieRings(data.tdee, data.weight_loss, data.weight_gain);
+  } catch (e) {
+    showToast('Could not calculate stats', 'error');
+  }
 }
 
 function renderMacroBars(protein, carbs, fat, tdee) {
-  const total = protein * 4 + carbs * 4 + fat * 9
-  const bars = [
-    { label: 'Protein', value: protein, unit: 'g', kcal: protein * 4, color: '#0f62fe' },
-    { label: 'Carbs',   value: carbs,   unit: 'g', kcal: carbs * 4,   color: '#ff832b' },
-    { label: 'Fat',     value: fat,     unit: 'g', kcal: fat * 9,     color: '#24a148' },
-  ]
-  $('macroBars').innerHTML = bars.map(b => `
-    <div class="macro-bar-item">
-      <div class="macro-bar-label">
-        <span>${b.label} <strong>${b.value}${b.unit}</strong></span>
-        <span>${b.kcal} kcal</span>
-      </div>
-      <div class="macro-bar-track">
-        <div class="macro-bar-fill" style="width:${Math.round(b.kcal/total*100)}%; background:${b.color}"></div>
-      </div>
-    </div>`).join('')
+  const macros = [
+    { label: 'Protein', g: protein, kcal: protein * 4, color: '#f59e0b' },
+    { label: 'Carbohydrates', g: carbs,   kcal: carbs   * 4, color: '#3b82f6' },
+    { label: 'Fat',     g: fat,     kcal: fat     * 9, color: '#ef4444' },
+  ];
+  $('macroBars').innerHTML = macros.map(m => {
+    const pct = Math.round((m.kcal / tdee) * 100);
+    return `
+      <div class="macro-bar-item">
+        <div class="macro-bar-label">
+          <span>${m.label}</span>
+          <span>${m.g}g · ${pct}%</span>
+        </div>
+        <div class="macro-bar-track">
+          <div class="macro-bar-fill" style="width:${pct}%;background:${m.color}"></div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function renderCalorieRings(tdee, loss, gain) {
-  $('calorieRings').innerHTML = [
-    { label: 'Maintenance', value: tdee, color: '#0f62fe' },
-    { label: 'Weight Loss',  value: loss, color: '#ff832b' },
-    { label: 'Weight Gain',  value: gain, color: '#24a148' },
-  ].map(r => `
+  $('calorieRings').innerHTML = `
     <div class="cal-ring-item">
-      <div class="cal-ring-label" style="color:${r.color}">${r.label}</div>
-      <div class="cal-ring-value">${r.value}</div>
-      <small style="color:var(--text-muted);font-size:.7rem">kcal/day</small>
-    </div>`).join('')
+      <span class="cal-ring-label">🔥 Maintenance</span>
+      <span class="cal-ring-value">${tdee.toLocaleString()} kcal</span>
+    </div>
+    <div class="cal-ring-item">
+      <span class="cal-ring-label">📉 Weight Loss</span>
+      <span class="cal-ring-value">${loss.toLocaleString()} kcal</span>
+    </div>
+    <div class="cal-ring-item">
+      <span class="cal-ring-label">📈 Weight Gain</span>
+      <span class="cal-ring-value">${gain.toLocaleString()} kcal</span>
+    </div>`;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   WORKOUT PLANNER
-══════════════════════════════════════════════════════════════════════════ */
-function initWorkout() {
-  $('generateWorkoutBtn').addEventListener('click', generateWorkout)
-  $('copyWorkoutBtn').addEventListener('click', () => copyText('workoutContent'))
-}
-
-async function generateWorkout() {
-  const level    = $('workoutLevel').value
-  const focus    = $('workoutFocus').value
-  const duration = $('workoutDuration').value
-  const equip    = $('workoutEquipment').value
-  const goal     = $('workoutGoal').value
-
-  $('workoutOutput').style.display = 'none'
-  $('workoutLoader').style.display = 'flex'
-
-  try {
-    const res  = await fetch('/api/workout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fitness_level: level, focus, duration: parseInt(duration), equipment: equip, goal }),
-    })
-    const data = await res.json()
-    $('workoutContent').innerHTML = formatMarkdown(data.workout || 'Could not generate workout.')
-    $('workoutOutput').style.display = 'block'
-  } catch {
-    showToast('Failed to generate workout. Please try again.', 'error')
-  }
-
-  $('workoutLoader').style.display = 'none'
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   NUTRITION
-══════════════════════════════════════════════════════════════════════════ */
-function initNutrition() {
-  $('generatePlanBtn').addEventListener('click', generateMealPlan)
-  $('copyPlanBtn').addEventListener('click', () => copyText('mealPlanContent'))
-  $('analyzeFoodBtn').addEventListener('click', analyzeFood)
-  $('copyAnalysisBtn').addEventListener('click', () => copyText('foodAnalysisContent'))
-
-  $('foodItem').addEventListener('keydown', e => {
-    if (e.key === 'Enter') analyzeFood()
-  })
-
-  document.querySelectorAll('.food-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      $('foodItem').value = chip.dataset.food
-      analyzeFood()
-    })
-  })
-}
-
-async function generateMealPlan() {
-  const profile = {
-    goal:      $('planGoal').value,
-    diet_type: $('planDiet').value,
-    calories:  parseInt($('planCalories').value) || 2000,
-  }
-
-  $('mealPlanOutput').style.display = 'none'
-  $('mealPlanLoader').style.display = 'flex'
-
-  try {
-    const res  = await fetch('/api/meal-plan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ profile, days: parseInt($('planDays').value) }),
-    })
-    const data = await res.json()
-    $('mealPlanContent').innerHTML = formatMarkdown(data.plan || 'Could not generate plan.')
-    $('mealPlanOutput').style.display = 'block'
-  } catch {
-    showToast('Failed to generate meal plan. Please try again.', 'error')
-  }
-
-  $('mealPlanLoader').style.display = 'none'
-}
-
-async function analyzeFood() {
-  const food = $('foodItem').value.trim()
-  const qty  = $('foodQty').value.trim() || '1 serving'
-  if (!food) { showToast('Please enter a food item', 'warning'); return }
-
-  $('foodAnalysisOutput').style.display = 'none'
-  $('foodAnalysisLoader').style.display = 'flex'
-
-  try {
-    const res  = await fetch('/api/analyze-food', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ food, quantity: qty }),
-    })
-    const data = await res.json()
-    if (data.error) { showToast(data.error, 'error'); return }
-    $('foodAnalysisContent').innerHTML = formatMarkdown(data.analysis || 'No analysis available.')
-    $('foodAnalysisOutput').style.display = 'block'
-  } catch {
-    showToast('Failed to analyze food. Please try again.', 'error')
-  }
-
-  $('foodAnalysisLoader').style.display = 'none'
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   HABIT BUILDER
-══════════════════════════════════════════════════════════════════════════ */
-function initHabits() {
-  $('generateHabitsBtn').addEventListener('click', generateHabits)
-  $('copyHabitsBtn').addEventListener('click', () => copyText('habitsContent'))
-}
-
-async function generateHabits() {
-  const level = $('habitLevel').value
-  const goals = Array.from(
-    document.querySelectorAll('#habitGoalCheckboxes input:checked')
-  ).map(cb => cb.value)
-
-  if (goals.length === 0) {
-    showToast('Please select at least one goal', 'warning')
-    return
-  }
-
-  $('habitsOutput').style.display = 'none'
-  $('habitsLoader').style.display = 'flex'
-
-  try {
-    const res  = await fetch('/api/habits', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ goals, fitness_level: level }),
-    })
-    const data = await res.json()
-    $('habitsContent').innerHTML = formatMarkdown(data.habits || 'Could not generate plan.')
-    $('habitsOutput').style.display = 'block'
-  } catch {
-    showToast('Failed to generate habit plan. Please try again.', 'error')
-  }
-
-  $('habitsLoader').style.display = 'none'
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    BMI CALCULATOR
-══════════════════════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════════════════ */
 function initBMI() {
-  $('calculateBmiBtn').addEventListener('click', calculateBMI)
+  $('calculateBmiBtn').addEventListener('click', calculateBMI);
 }
 
 async function calculateBMI() {
-  const weight   = parseFloat($('bmiWeight').value)
-  const height   = parseFloat($('bmiHeight').value)
-  const age      = parseInt($('bmiAge').value)
-  const gender   = document.querySelector('input[name="bmiGender"]:checked')?.value || 'male'
-  const activity = $('bmiActivity').value
-  const goal     = $('bmiGoal').value
+  const weight   = parseFloat($('bmiWeight').value);
+  const height   = parseFloat($('bmiHeight').value);
+  const age      = parseInt($('bmiAge').value);
+  const gender   = document.querySelector('input[name="bmiGender"]:checked')?.value || 'male';
+  const activity = $('bmiActivity').value;
+  const goal     = $('bmiGoal').value;
 
   if (!weight || !height || !age) {
-    showToast('Please fill in all measurements', 'warning')
-    return
+    showToast('Please enter weight, height, and age', 'warning');
+    return;
   }
 
-  $('calculateBmiBtn').disabled = true
-  $('calculateBmiBtn').textContent = 'Calculating…'
+  const btn = $('calculateBmiBtn');
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Calculating…';
+  btn.disabled  = true;
 
   try {
     const res  = await fetch('/api/bmi', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ weight, height, age, gender, activity, goal }),
-    })
-    const data = await res.json()
-    if (data.error) { showToast(data.error, 'error'); return }
-    displayBMIResults(data)
+    });
+    const data = await res.json();
+    displayBMIResults(data);
   } catch {
-    showToast('Calculation failed. Please try again.', 'error')
+    showToast('Calculation failed. Please try again.', 'error');
+  } finally {
+    btn.innerHTML = '<i class="bi bi-calculator"></i> Calculate';
+    btn.disabled  = false;
   }
-
-  $('calculateBmiBtn').disabled = false
-  $('calculateBmiBtn').innerHTML = '<i class="bi bi-calculator"></i> Calculate'
 }
 
 function displayBMIResults(data) {
-  $('bmiResultsPanel').style.display = 'block'
-  $('bmiValueDisplay').textContent  = data.bmi
-  $('bmiCategoryDisplay').textContent = data.category
-  $('bmiCategoryDisplay').style.color = data.color
-  $('bmiGauge').style.borderColor = data.color
+  $('bmiResultsPanel').style.display = 'block';
+  $('bmiResultsPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-  $('resBmr').textContent     = data.bmr
-  $('resTdee').textContent    = data.tdee
-  $('resLoss').textContent    = data.weight_loss
-  $('resGain').textContent    = data.weight_gain
-  $('resProtein').textContent = data.protein_g + 'g'
+  $('bmiValueDisplay').textContent    = data.bmi;
+  $('bmiValueDisplay').style.color    = data.color;
+  $('bmiCategoryDisplay').textContent = data.category;
+  $('bmiCategoryDisplay').style.color = data.color;
 
-  $('bmiResultsPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  $('resBmr').textContent     = data.bmr.toLocaleString();
+  $('resTdee').textContent    = data.tdee.toLocaleString();
+  $('resLoss').textContent    = data.weight_loss.toLocaleString();
+  $('resGain').textContent    = data.weight_gain.toLocaleString();
+  $('resProtein').textContent = data.protein_g + 'g';
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   UTILITIES
-══════════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   MEAL PLANNER
+   ════════════════════════════════════════════════════════ */
+function initMealPlanner() {
+  $('generatePlanBtn').addEventListener('click', generateMealPlan);
+  $('copyPlanBtn').addEventListener('click', () => copyText('mealPlanContent'));
+}
+
+async function generateMealPlan() {
+  const days     = parseInt($('planDays').value);
+  const diet     = $('planDiet').value;
+  const calories = parseInt($('planCalories').value) || 2000;
+  const goal     = $('planGoal').value;
+
+  const profile = { ...state.userProfile, diet_type: diet, goal, calories };
+
+  $('mealPlanOutput').style.display = 'none';
+  $('mealPlanLoader').style.display = 'flex';
+
+  const btn = $('generatePlanBtn');
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating…';
+  btn.disabled  = true;
+
+  try {
+    const res  = await fetch('/api/meal-plan', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ days, profile }),
+    });
+    const data = await res.json();
+
+    $('mealPlanLoader').style.display  = 'none';
+    $('mealPlanOutput').style.display  = 'block';
+    $('mealPlanContent').innerHTML     = formatMarkdown(data.plan);
+    $('mealPlanOutput').scrollIntoView({ behavior: 'smooth' });
+  } catch {
+    $('mealPlanLoader').style.display = 'none';
+    showToast('Failed to generate meal plan', 'error');
+  } finally {
+    btn.innerHTML = '<i class="bi bi-magic"></i> Generate';
+    btn.disabled  = false;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   FAMILY PROFILES
+   ════════════════════════════════════════════════════════ */
+function initFamilyProfiles() {
+  $('addMemberBtn').addEventListener('click', addFamilyMember);
+  $('genFamilyPlanBtn').addEventListener('click', generateFamilyPlan);
+  $('copyFamilyBtn').addEventListener('click', () => copyText('familyPlanContent'));
+}
+
+function addFamilyMember() {
+  const name   = $('famName').value.trim();
+  const age    = parseInt($('famAge').value);
+  const gender = $('famGender').value;
+  const goal   = $('famGoal').value;
+  const diet   = $('famDiet').value.trim();
+
+  if (!name || !age) {
+    showToast('Please enter name and age', 'warning');
+    return;
+  }
+  if (state.familyMembers.length >= 8) {
+    showToast('Maximum 8 family members allowed', 'warning');
+    return;
+  }
+
+  const member = { name, age, gender, goal, diet, id: Date.now() };
+  state.familyMembers.push(member);
+  renderFamilyMembers();
+
+  // Clear inputs
+  $('famName').value = '';
+  $('famAge').value  = '';
+  $('famDiet').value = '';
+
+  if (state.familyMembers.length > 0) $('genFamilyPlanBtn').style.display = 'block';
+}
+
+function renderFamilyMembers() {
+  const emojis = { male: '👨', female: '👩' };
+  const list   = $('familyMembersList');
+
+  if (state.familyMembers.length === 0) {
+    list.innerHTML = '<p class="text-muted text-center py-3">No family members added yet.</p>';
+    $('genFamilyPlanBtn').style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = state.familyMembers.map(m => `
+    <div class="member-card">
+      <div class="member-avatar">${emojis[m.gender] || '🧑'}</div>
+      <div class="member-info">
+        <div class="member-name">${escapeHtml(m.name)}</div>
+        <div class="member-meta">${m.age} yrs · ${m.gender} · ${m.goal.replace(/_/g,' ')}</div>
+      </div>
+      <button class="btn-remove-member" onclick="removeMember(${m.id})">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>`).join('');
+}
+
+function removeMember(id) {
+  state.familyMembers = state.familyMembers.filter(m => m.id !== id);
+  renderFamilyMembers();
+}
+
+async function generateFamilyPlan() {
+  if (state.familyMembers.length === 0) {
+    showToast('Add at least one family member', 'warning');
+    return;
+  }
+
+  $('familyPlanOutput').style.display = 'none';
+  $('familyPlanLoader').style.display = 'flex';
+
+  const btn = $('genFamilyPlanBtn');
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating…';
+  btn.disabled  = true;
+
+  try {
+    const res  = await fetch('/api/family-plan', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ members: state.familyMembers }),
+    });
+    const data = await res.json();
+
+    $('familyPlanLoader').style.display  = 'none';
+    $('familyPlanOutput').style.display  = 'block';
+    $('familyPlanContent').innerHTML     = formatMarkdown(data.plan);
+    $('familyPlanOutput').scrollIntoView({ behavior: 'smooth' });
+  } catch {
+    $('familyPlanLoader').style.display = 'none';
+    showToast('Failed to generate family plan', 'error');
+  } finally {
+    btn.innerHTML = '<i class="bi bi-magic"></i> Generate Family Plan';
+    btn.disabled  = false;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   FOOD ANALYZER
+   ════════════════════════════════════════════════════════ */
+function initFoodAnalyzer() {
+  $('analyzeFoodBtn').addEventListener('click', analyzeFood);
+  $('copyAnalysisBtn').addEventListener('click', () => copyText('foodAnalysisContent'));
+
+  $('foodItem').addEventListener('keydown', e => {
+    if (e.key === 'Enter') analyzeFood();
+  });
+
+  document.querySelectorAll('.food-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      $('foodItem').value = chip.dataset.food;
+      analyzeFood();
+    });
+  });
+}
+
+async function analyzeFood() {
+  const food = $('foodItem').value.trim();
+  const qty  = $('foodQty').value.trim() || '1 serving';
+
+  if (!food) {
+    showToast('Please enter a food item', 'warning');
+    return;
+  }
+
+  $('foodAnalysisOutput').style.display = 'none';
+  $('foodAnalysisLoader').style.display = 'flex';
+
+  const btn = $('analyzeFoodBtn');
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analysing…';
+  btn.disabled  = true;
+
+  try {
+    const res  = await fetch('/api/analyze-food', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ food, quantity: qty }),
+    });
+    const data = await res.json();
+
+    $('foodAnalysisLoader').style.display  = 'none';
+    $('foodAnalysisOutput').style.display  = 'block';
+    $('foodAnalysisContent').innerHTML     = formatMarkdown(data.analysis);
+    $('foodAnalysisOutput').scrollIntoView({ behavior: 'smooth' });
+  } catch {
+    $('foodAnalysisLoader').style.display = 'none';
+    showToast('Analysis failed. Please try again.', 'error');
+  } finally {
+    btn.innerHTML = '<i class="bi bi-search"></i> Analyze';
+    btn.disabled  = false;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   HELPERS
+   ════════════════════════════════════════════════════════ */
+
+/** Minimal Markdown → HTML converter */
 function formatMarkdown(text) {
-  if (!text) return ''
+  if (!text) return '';
   return text
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/^#{1,3} (.+)$/gm, '<strong>$1</strong>')
-    .replace(/^[\*\-] (.+)$/gm, '• $1')
-    .replace(/\n/g, '<br>')
+    // Bold
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Italic
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Headers
+    .replace(/^### (.+)$/gm, '<h6 style="margin:.6em 0 .3em;font-weight:700;">$1</h6>')
+    .replace(/^## (.+)$/gm,  '<h5 style="margin:.8em 0 .4em;font-weight:700;">$1</h5>')
+    .replace(/^# (.+)$/gm,   '<h4 style="margin:1em 0 .4em;font-weight:700;">$1</h4>')
+    // Unordered list items
+    .replace(/^[\•\-\*] (.+)$/gm, '<li>$1</li>')
+    // Wrap consecutive <li> in <ul>
+    .replace(/((<li>.*<\/li>\n?)+)/g, '<ul style="padding-left:18px;margin:4px 0">$1</ul>')
+    // Newlines → <br>
+    .replace(/\n{2,}/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>');
 }
 
 function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-            .replace(/"/g,'&quot;').replace(/'/g,'&#039;')
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 function now() {
-  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 }
 
 function copyText(elementId) {
-  const el   = $(elementId)
-  const text = el?.innerText || el?.textContent
-  if (!text) return
-  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!', 'success'))
+  const el   = $(elementId);
+  const text = el ? el.innerText : '';
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Copied to clipboard!', 'success');
+  }).catch(() => {
+    showToast('Copy failed', 'error');
+  });
 }
 
 function showToast(message, type = 'info') {
-  const toast   = $('appToast')
-  const toastEl = $('toastMsg')
-  toastEl.textContent = message
+  const toastEl = $('appToast');
+  const toastMsg = $('toastMsg');
+  if (!toastEl) return;
 
-  toast.className = 'toast align-items-center border-0'
-  const colours = { success: 'text-bg-success', error: 'text-bg-danger', warning: 'text-bg-warning', info: 'text-bg-primary' }
-  toast.classList.add(colours[type] || 'text-bg-primary')
+  const colors = {
+    success: '#16a34a',
+    warning: '#f59e0b',
+    error:   '#ef4444',
+    info:    '#0ea5e9',
+  };
+  toastEl.style.borderLeft = `4px solid ${colors[type] || colors.info}`;
+  toastMsg.textContent = message;
 
-  const bsToast = bootstrap.Toast.getOrCreateInstance(toast, { delay: 3000 })
-  bsToast.show()
+  const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 });
+  toast.show();
 }

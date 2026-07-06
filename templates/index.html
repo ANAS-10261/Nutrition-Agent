@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fitness Buddy — AI Fitness Coach · IBM Watsonx.ai</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>" />
+  <title>NutriBot — AI Nutrition Assistant · IBM Watsonx.ai</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>" />
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -20,30 +20,30 @@
   <!-- ── Sidebar Navigation ──────────────────────────────────────────────── -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <span class="brand-icon">💪</span>
-      <span class="brand-text">Fitness Buddy</span>
+      <span class="brand-icon">🥗</span>
+      <span class="brand-text">NutriBot</span>
       <span class="brand-badge">AI</span>
     </div>
     <div class="sidebar-powered">Powered by IBM Watsonx.ai · Llama 3.3</div>
 
     <ul class="sidebar-nav">
       <li><a href="#" class="nav-link active" data-tab="chat">
-        <i class="bi bi-chat-dots-fill"></i> <span>AI Coach</span>
+        <i class="bi bi-chat-dots-fill"></i> <span>Chat</span>
       </a></li>
       <li><a href="#" class="nav-link" data-tab="dashboard">
         <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
       </a></li>
-      <li><a href="#" class="nav-link" data-tab="workout">
-        <i class="bi bi-lightning-fill"></i> <span>Workout Planner</span>
-      </a></li>
-      <li><a href="#" class="nav-link" data-tab="nutrition">
-        <i class="bi bi-egg-fried"></i> <span>Nutrition</span>
-      </a></li>
-      <li><a href="#" class="nav-link" data-tab="habits">
-        <i class="bi bi-check2-circle"></i> <span>Habit Builder</span>
+      <li><a href="#" class="nav-link" data-tab="mealplan">
+        <i class="bi bi-calendar3"></i> <span>Meal Planner</span>
       </a></li>
       <li><a href="#" class="nav-link" data-tab="bmi">
-        <i class="bi bi-heart-pulse-fill"></i> <span>BMI &amp; Calories</span>
+        <i class="bi bi-heart-pulse-fill"></i> <span>BMI & Calories</span>
+      </a></li>
+      <li><a href="#" class="nav-link" data-tab="family">
+        <i class="bi bi-people-fill"></i> <span>Family Profiles</span>
+      </a></li>
+      <li><a href="#" class="nav-link" data-tab="analyze">
+        <i class="bi bi-search"></i> <span>Food Analyzer</span>
       </a></li>
     </ul>
 
@@ -61,7 +61,7 @@
   <!-- ── Mobile top bar ──────────────────────────────────────────────────── -->
   <header class="mobile-header d-lg-none">
     <button class="btn-sidebar-toggle" id="sidebarToggle"><i class="bi bi-list"></i></button>
-    <span class="mobile-title">💪 Fitness Buddy</span>
+    <span class="mobile-title">🥗 NutriBot</span>
     <button class="btn-theme-toggle" id="themeToggleMobile"><i class="bi bi-moon-stars-fill"></i></button>
   </header>
 
@@ -74,7 +74,7 @@
         <div class="chat-header">
           <div class="agent-avatar"><span>🤖</span></div>
           <div class="agent-info">
-            <h5 class="agent-name" id="agentNameDisplay">Fitness Buddy</h5>
+            <h5 class="agent-name" id="agentNameDisplay">NutriBot</h5>
             <span class="agent-status"><span class="dot-online"></span> Online · Llama 3.3 70B</span>
           </div>
           <button class="btn-icon ms-auto" id="clearChatBtn" title="Clear conversation">
@@ -86,33 +86,32 @@
           <div class="message bot-message">
             <div class="msg-avatar">🤖</div>
             <div class="msg-bubble">
-              <p>👋 Hey! I'm <strong>Fitness Buddy</strong>, your AI-powered personal fitness coach!</p>
+              <p>👋 Hello! I'm <strong>NutriBot</strong>, your AI-powered nutrition assistant.</p>
               <p>I'm here to help you with:</p>
               <ul>
-                <li>🏋️ Personalised home workout routines</li>
-                <li>🌟 Daily motivation &amp; fitness inspiration</li>
-                <li>🥗 Nutrition &amp; meal planning guidance</li>
-                <li>⚖️ BMI &amp; calorie calculations</li>
-                <li>📅 Habit building &amp; consistency tips</li>
+                <li>🍱 Personalised Indian meal plans</li>
+                <li>📊 Calorie &amp; macro analysis</li>
+                <li>⚖️ BMI &amp; TDEE calculations</li>
+                <li>👨‍👩‍👧‍👦 Family nutrition recommendations</li>
+                <li>🌿 Ayurvedic &amp; healthy eating tips</li>
               </ul>
-              <p>What fitness goal are we working on today? 💪</p>
+              <p>What would you like to explore today?</p>
             </div>
           </div>
         </div>
 
         <!-- Quick prompts -->
         <div class="quick-prompts" id="quickPrompts">
-          <button class="quick-btn" data-prompt="Give me a 30-minute home workout for beginners with no equipment">🏠 Home Workout</button>
-          <button class="quick-btn" data-prompt="What should I eat before and after a workout?">🥗 Pre/Post Workout Meals</button>
-          <button class="quick-btn" data-prompt="Give me a motivational fitness tip for today">🌟 Daily Motivation</button>
-          <button class="quick-btn" data-prompt="Create a beginner workout plan for weight loss">⚖️ Weight Loss Plan</button>
-          <button class="quick-btn" data-prompt="How do I build a consistent workout habit?">📅 Build Habits</button>
-          <button class="quick-btn" data-prompt="Give me a 15-minute morning yoga and stretch routine">🧘 Morning Stretch</button>
+          <button class="quick-btn" data-prompt="Give me a healthy Indian breakfast plan for weight loss">🌅 Breakfast Plan</button>
+          <button class="quick-btn" data-prompt="What are the best high-protein Indian foods?">💪 High Protein Foods</button>
+          <button class="quick-btn" data-prompt="Suggest a diabetic-friendly Indian dinner">🩺 Diabetic Diet</button>
+          <button class="quick-btn" data-prompt="How many calories in a bowl of dal rice?">🍚 Calorie Query</button>
+          <button class="quick-btn" data-prompt="What are Ayurvedic superfoods for immunity?">🌿 Ayurvedic Tips</button>
         </div>
 
         <div class="chat-input-area">
           <div class="input-wrapper">
-            <textarea id="chatInput" class="chat-input" placeholder="Ask about workouts, nutrition, motivation…" rows="1"></textarea>
+            <textarea id="chatInput" class="chat-input" placeholder="Ask about nutrition, recipes, meal plans…" rows="1"></textarea>
             <button class="btn-send" id="sendBtn"><i class="bi bi-send-fill"></i></button>
           </div>
           <div class="input-meta">
@@ -126,28 +125,14 @@
     <!-- ════════════════ DASHBOARD TAB ════════════════ -->
     <section class="tab-pane" id="tab-dashboard">
       <div class="page-header">
-        <h2><i class="bi bi-speedometer2"></i> My Fitness Dashboard</h2>
-        <p class="text-muted">Your personalised fitness overview</p>
-      </div>
-
-      <!-- Daily motivation card -->
-      <div class="card motivation-card mb-4" id="motivationCard">
-        <div class="card-body d-flex align-items-start gap-3">
-          <div class="motivation-icon">🌟</div>
-          <div class="flex-grow-1">
-            <div class="motivation-label">Daily Motivation</div>
-            <div id="motivationText" class="motivation-text">Loading your daily fitness inspiration…</div>
-          </div>
-          <button class="btn btn-sm btn-outline-primary" id="refreshMotivation">
-            <i class="bi bi-arrow-clockwise"></i>
-          </button>
-        </div>
+        <h2><i class="bi bi-speedometer2"></i> Nutrition Dashboard</h2>
+        <p class="text-muted">Your personalised health overview</p>
       </div>
 
       <!-- Profile setup card -->
       <div class="card profile-setup-card mb-4" id="profileSetupCard">
         <div class="card-body">
-          <h5 class="card-title"><i class="bi bi-person-circle"></i> Set Up Your Fitness Profile</h5>
+          <h5 class="card-title"><i class="bi bi-person-circle"></i> Set Up Your Profile</h5>
           <div class="row g-3">
             <div class="col-md-3">
               <label class="form-label">Name</label>
@@ -174,9 +159,9 @@
               <input type="number" class="form-control" id="profileHeight" placeholder="cm" min="100" max="250" />
             </div>
             <div class="col-md-3">
-              <label class="form-label">Fitness Goal</label>
+              <label class="form-label">Goal</label>
               <select class="form-select" id="profileGoal">
-                <option value="general_fitness">General Fitness</option>
+                <option value="healthy_eating">Healthy Eating</option>
                 <option value="weight_loss">Weight Loss</option>
                 <option value="weight_gain">Weight Gain</option>
                 <option value="muscle_gain">Muscle Gain</option>
@@ -184,25 +169,18 @@
               </select>
             </div>
             <div class="col-md-3">
-              <label class="form-label">Fitness Level</label>
-              <select class="form-select" id="profileFitnessLevel">
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
+              <label class="form-label">Diet Type</label>
+              <select class="form-select" id="profileDiet">
+                <option value="vegetarian">Vegetarian</option>
+                <option value="vegan">Vegan</option>
+                <option value="non-vegetarian">Non-Vegetarian</option>
+                <option value="jain">Jain</option>
+                <option value="keto">Keto</option>
               </select>
             </div>
             <div class="col-md-3">
-              <label class="form-label">Available Equipment</label>
-              <select class="form-select" id="profileEquipment">
-                <option value="none">No Equipment (Bodyweight)</option>
-                <option value="dumbbells">Dumbbells</option>
-                <option value="resistance_bands">Resistance Bands</option>
-                <option value="full_gym">Full Gym Access</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Time Available (min/day)</label>
-              <input type="number" class="form-control" id="profileTime" placeholder="30" value="30" min="10" max="120" />
+              <label class="form-label">Allergies</label>
+              <input type="text" class="form-control" id="profileAllergies" placeholder="e.g. peanuts, dairy" />
             </div>
             <div class="col-12">
               <button class="btn btn-primary" id="saveProfileBtn"><i class="bi bi-check-circle"></i> Save Profile</button>
@@ -268,103 +246,15 @@
       </div>
     </section>
 
-    <!-- ════════════════ WORKOUT PLANNER TAB ════════════════ -->
-    <section class="tab-pane" id="tab-workout">
+    <!-- ════════════════ MEAL PLANNER TAB ════════════════ -->
+    <section class="tab-pane" id="tab-mealplan">
       <div class="page-header">
-        <h2><i class="bi bi-lightning-fill"></i> AI Workout Planner</h2>
-        <p class="text-muted">Personalised workout routines generated by IBM Watsonx.ai</p>
+        <h2><i class="bi bi-calendar3"></i> AI Meal Planner</h2>
+        <p class="text-muted">Personalised Indian meal plans generated by IBM Watsonx.ai</p>
       </div>
 
       <div class="card mb-4">
         <div class="card-body">
-          <div class="row g-3 align-items-end">
-            <div class="col-md-3">
-              <label class="form-label">Fitness Level</label>
-              <select class="form-select" id="workoutLevel">
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Focus Area</label>
-              <select class="form-select" id="workoutFocus">
-                <option value="full body">Full Body</option>
-                <option value="upper body">Upper Body</option>
-                <option value="lower body">Lower Body</option>
-                <option value="core &amp; abs">Core &amp; Abs</option>
-                <option value="cardio">Cardio</option>
-                <option value="flexibility &amp; stretching">Flexibility &amp; Stretching</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Duration (min)</label>
-              <select class="form-select" id="workoutDuration">
-                <option value="15">15 min</option>
-                <option value="20">20 min</option>
-                <option value="30" selected>30 min</option>
-                <option value="45">45 min</option>
-                <option value="60">60 min</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Equipment</label>
-              <select class="form-select" id="workoutEquipment">
-                <option value="none">No Equipment</option>
-                <option value="dumbbells">Dumbbells</option>
-                <option value="resistance bands">Resistance Bands</option>
-                <option value="full gym">Full Gym</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <button class="btn btn-success w-100" id="generateWorkoutBtn">
-                <i class="bi bi-lightning-fill"></i> Generate
-              </button>
-            </div>
-          </div>
-          <!-- Goal row -->
-          <div class="row g-3 mt-1">
-            <div class="col-md-4">
-              <label class="form-label">Workout Goal</label>
-              <select class="form-select" id="workoutGoal">
-                <option value="general fitness">General Fitness</option>
-                <option value="weight loss">Weight Loss</option>
-                <option value="muscle gain">Muscle Gain</option>
-                <option value="endurance">Endurance</option>
-                <option value="flexibility">Flexibility</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="workoutOutput" class="ai-output-card" style="display:none">
-        <div class="output-header">
-          <span><i class="bi bi-lightning-fill"></i> Your Workout Routine</span>
-          <button class="btn-copy" id="copyWorkoutBtn"><i class="bi bi-clipboard"></i> Copy</button>
-        </div>
-        <div class="output-body" id="workoutContent"></div>
-      </div>
-
-      <div id="workoutLoader" class="loader-container" style="display:none">
-        <div class="ai-loader">
-          <div class="loader-dots"><span></span><span></span><span></span></div>
-          <p>IBM Watsonx.ai is building your personalised workout…</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ════════════════ NUTRITION TAB ════════════════ -->
-    <section class="tab-pane" id="tab-nutrition">
-      <div class="page-header">
-        <h2><i class="bi bi-egg-fried"></i> Nutrition Planner</h2>
-        <p class="text-muted">AI-powered meal plans and food analysis for your fitness goals</p>
-      </div>
-
-      <!-- Meal Plan Generator -->
-      <div class="card mb-4">
-        <div class="card-body">
-          <h5 class="card-title"><i class="bi bi-calendar3"></i> Meal Plan Generator</h5>
           <div class="row g-3 align-items-end">
             <div class="col-md-3">
               <label class="form-label">Plan Duration</label>
@@ -377,11 +267,10 @@
             <div class="col-md-3">
               <label class="form-label">Diet Preference</label>
               <select class="form-select" id="planDiet">
-                <option value="balanced">Balanced</option>
                 <option value="vegetarian">Vegetarian</option>
                 <option value="vegan">Vegan</option>
-                <option value="high-protein">High Protein</option>
-                <option value="low-carb">Low Carb</option>
+                <option value="non-vegetarian">Non-Vegetarian</option>
+                <option value="jain">Jain</option>
               </select>
             </div>
             <div class="col-md-2">
@@ -391,9 +280,9 @@
             <div class="col-md-2">
               <label class="form-label">Goal</label>
               <select class="form-select" id="planGoal">
-                <option value="general fitness">General Fitness</option>
-                <option value="weight loss">Weight Loss</option>
-                <option value="muscle gain">Muscle Gain</option>
+                <option value="healthy_eating">Healthy Eating</option>
+                <option value="weight_loss">Weight Loss</option>
+                <option value="muscle_gain">Muscle Gain</option>
               </select>
             </div>
             <div class="col-md-2">
@@ -416,113 +305,7 @@
       <div id="mealPlanLoader" class="loader-container" style="display:none">
         <div class="ai-loader">
           <div class="loader-dots"><span></span><span></span><span></span></div>
-          <p>IBM Watsonx.ai is crafting your fitness meal plan…</p>
-        </div>
-      </div>
-
-      <!-- Food Analyzer -->
-      <div class="card mt-4 mb-4">
-        <div class="card-body">
-          <h5 class="card-title"><i class="bi bi-search"></i> Food Analyzer</h5>
-          <div class="row g-3 align-items-end">
-            <div class="col-md-5">
-              <label class="form-label">Food Item</label>
-              <input type="text" class="form-control" id="foodItem" placeholder="e.g. Chicken Breast, Banana, Brown Rice" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Quantity / Serving</label>
-              <input type="text" class="form-control" id="foodQty" placeholder="e.g. 1 cup, 100g" value="1 serving" />
-            </div>
-            <div class="col-md-2">
-              <button class="btn btn-primary w-100" id="analyzeFoodBtn">
-                <i class="bi bi-search"></i> Analyze
-              </button>
-            </div>
-          </div>
-          <div class="mt-3">
-            <small class="text-muted">Quick search:</small>
-            <div class="popular-foods mt-1">
-              <button class="food-chip" data-food="Chicken Breast">🍗 Chicken</button>
-              <button class="food-chip" data-food="Banana">🍌 Banana</button>
-              <button class="food-chip" data-food="Brown Rice">🍚 Brown Rice</button>
-              <button class="food-chip" data-food="Greek Yogurt">🥛 Greek Yogurt</button>
-              <button class="food-chip" data-food="Eggs">🥚 Eggs</button>
-              <button class="food-chip" data-food="Oats">🥣 Oats</button>
-              <button class="food-chip" data-food="Avocado">🥑 Avocado</button>
-              <button class="food-chip" data-food="Sweet Potato">🍠 Sweet Potato</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="foodAnalysisOutput" class="ai-output-card" style="display:none">
-        <div class="output-header">
-          <span><i class="bi bi-bar-chart-fill"></i> Nutritional Analysis</span>
-          <button class="btn-copy" id="copyAnalysisBtn"><i class="bi bi-clipboard"></i> Copy</button>
-        </div>
-        <div class="output-body" id="foodAnalysisContent"></div>
-      </div>
-
-      <div id="foodAnalysisLoader" class="loader-container" style="display:none">
-        <div class="ai-loader">
-          <div class="loader-dots"><span></span><span></span><span></span></div>
-          <p>Analysing nutritional content…</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ════════════════ HABIT BUILDER TAB ════════════════ -->
-    <section class="tab-pane" id="tab-habits">
-      <div class="page-header">
-        <h2><i class="bi bi-check2-circle"></i> Habit Builder</h2>
-        <p class="text-muted">Build lasting fitness habits with a personalised 30-day plan</p>
-      </div>
-
-      <div class="card mb-4">
-        <div class="card-body">
-          <h5 class="card-title"><i class="bi bi-calendar-range"></i> Generate Your 30-Day Habit Plan</h5>
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label class="form-label">Fitness Level</label>
-              <select class="form-select" id="habitLevel">
-                <option value="beginner">Beginner (just starting out)</option>
-                <option value="intermediate">Intermediate (some experience)</option>
-                <option value="advanced">Advanced (consistent for 6+ months)</option>
-              </select>
-            </div>
-            <div class="col-md-8">
-              <label class="form-label">Your Goals (select all that apply)</label>
-              <div class="d-flex flex-wrap gap-2 mt-1" id="habitGoalCheckboxes">
-                <label class="habit-goal-check"><input type="checkbox" value="lose weight" checked /> Lose Weight</label>
-                <label class="habit-goal-check"><input type="checkbox" value="build muscle" /> Build Muscle</label>
-                <label class="habit-goal-check"><input type="checkbox" value="improve endurance" /> Improve Endurance</label>
-                <label class="habit-goal-check"><input type="checkbox" value="reduce stress" /> Reduce Stress</label>
-                <label class="habit-goal-check"><input type="checkbox" value="sleep better" /> Sleep Better</label>
-                <label class="habit-goal-check"><input type="checkbox" value="eat healthier" /> Eat Healthier</label>
-                <label class="habit-goal-check"><input type="checkbox" value="increase flexibility" /> Increase Flexibility</label>
-              </div>
-            </div>
-            <div class="col-12">
-              <button class="btn btn-success" id="generateHabitsBtn">
-                <i class="bi bi-magic"></i> Generate My 30-Day Plan
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="habitsOutput" class="ai-output-card" style="display:none">
-        <div class="output-header">
-          <span><i class="bi bi-check2-circle"></i> Your 30-Day Habit Plan</span>
-          <button class="btn-copy" id="copyHabitsBtn"><i class="bi bi-clipboard"></i> Copy</button>
-        </div>
-        <div class="output-body" id="habitsContent"></div>
-      </div>
-
-      <div id="habitsLoader" class="loader-container" style="display:none">
-        <div class="ai-loader">
-          <div class="loader-dots"><span></span><span></span><span></span></div>
-          <p>Building your personalised habit plan…</p>
+          <p>IBM Watsonx.ai is crafting your personalised meal plan…</p>
         </div>
       </div>
     </section>
@@ -530,7 +313,7 @@
     <!-- ════════════════ BMI CALCULATOR TAB ════════════════ -->
     <section class="tab-pane" id="tab-bmi">
       <div class="page-header">
-        <h2><i class="bi bi-heart-pulse-fill"></i> BMI &amp; Calorie Calculator</h2>
+        <h2><i class="bi bi-heart-pulse-fill"></i> BMI & Calorie Calculator</h2>
         <p class="text-muted">Calculate your Body Mass Index and daily caloric needs</p>
       </div>
 
@@ -541,15 +324,15 @@
               <h5 class="card-title">Your Measurements</h5>
               <div class="mb-3">
                 <label class="form-label">Weight (kg)</label>
-                <input type="number" class="form-control" id="bmiWeight" placeholder="e.g. 70" min="20" max="300" />
+                <input type="number" class="form-control" id="bmiWeight" placeholder="e.g. 65" min="20" max="300" />
               </div>
               <div class="mb-3">
                 <label class="form-label">Height (cm)</label>
-                <input type="number" class="form-control" id="bmiHeight" placeholder="e.g. 175" min="100" max="250" />
+                <input type="number" class="form-control" id="bmiHeight" placeholder="e.g. 170" min="100" max="250" />
               </div>
               <div class="mb-3">
                 <label class="form-label">Age</label>
-                <input type="number" class="form-control" id="bmiAge" placeholder="e.g. 25" min="5" max="100" />
+                <input type="number" class="form-control" id="bmiAge" placeholder="e.g. 30" min="5" max="100" />
               </div>
               <div class="mb-3">
                 <label class="form-label">Gender</label>
@@ -577,7 +360,7 @@
               <div class="mb-3">
                 <label class="form-label">Goal</label>
                 <select class="form-select" id="bmiGoal">
-                  <option value="general_fitness">General Fitness</option>
+                  <option value="maintenance">Maintenance</option>
                   <option value="weight_loss">Weight Loss</option>
                   <option value="weight_gain">Weight Gain</option>
                   <option value="muscle_gain">Muscle Gain</option>
@@ -647,6 +430,140 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ FAMILY PROFILES TAB ════════════════ -->
+    <section class="tab-pane" id="tab-family">
+      <div class="page-header">
+        <h2><i class="bi bi-people-fill"></i> Family Profiles</h2>
+        <p class="text-muted">Create nutrition plans that work for the whole family</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title"><i class="bi bi-person-plus-fill"></i> Add Family Member</h5>
+              <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control" id="famName" placeholder="e.g. Dad, Mom, Priya" />
+              </div>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label class="form-label">Age</label>
+                  <input type="number" class="form-control" id="famAge" placeholder="Age" />
+                </div>
+                <div class="col-6">
+                  <label class="form-label">Gender</label>
+                  <select class="form-select" id="famGender">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3 mt-2">
+                <label class="form-label">Health Goal</label>
+                <select class="form-select" id="famGoal">
+                  <option value="healthy_eating">Healthy Eating</option>
+                  <option value="weight_loss">Weight Loss</option>
+                  <option value="weight_gain">Weight Gain</option>
+                  <option value="muscle_gain">Muscle Gain</option>
+                  <option value="diabetic_management">Diabetic Management</option>
+                  <option value="heart_health">Heart Health</option>
+                  <option value="child_growth">Child Growth</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Dietary Restriction</label>
+                <input type="text" class="form-control" id="famDiet" placeholder="e.g. no dairy, vegetarian" />
+              </div>
+              <button class="btn btn-outline-primary w-100 mb-2" id="addMemberBtn">
+                <i class="bi bi-plus-circle"></i> Add Member
+              </button>
+              <button class="btn btn-success w-100" id="genFamilyPlanBtn" style="display:none">
+                <i class="bi bi-magic"></i> Generate Family Plan
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-7">
+          <div id="familyMembersList" class="mb-3"></div>
+
+          <div id="familyPlanOutput" class="ai-output-card" style="display:none">
+            <div class="output-header">
+              <span><i class="bi bi-people-fill"></i> Family Nutrition Plan</span>
+              <button class="btn-copy" id="copyFamilyBtn"><i class="bi bi-clipboard"></i> Copy</button>
+            </div>
+            <div class="output-body" id="familyPlanContent"></div>
+          </div>
+
+          <div id="familyPlanLoader" class="loader-container" style="display:none">
+            <div class="ai-loader">
+              <div class="loader-dots"><span></span><span></span><span></span></div>
+              <p>Crafting your family nutrition plan…</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ FOOD ANALYZER TAB ════════════════ -->
+    <section class="tab-pane" id="tab-analyze">
+      <div class="page-header">
+        <h2><i class="bi bi-search"></i> Food Analyzer</h2>
+        <p class="text-muted">Instant nutritional breakdown of any food or dish</p>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-5">
+              <label class="form-label">Food Item</label>
+              <input type="text" class="form-control" id="foodItem" placeholder="e.g. Dal Makhani, Idli, Chapati" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Quantity / Serving</label>
+              <input type="text" class="form-control" id="foodQty" placeholder="e.g. 1 bowl, 100g" value="1 serving" />
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary w-100" id="analyzeFoodBtn">
+                <i class="bi bi-search"></i> Analyze
+              </button>
+            </div>
+          </div>
+
+          <!-- Popular foods quick-pick -->
+          <div class="mt-3">
+            <small class="text-muted">Popular searches:</small>
+            <div class="popular-foods mt-1">
+              <button class="food-chip" data-food="Dal Makhani">🫘 Dal Makhani</button>
+              <button class="food-chip" data-food="Chicken Biryani">🍚 Biryani</button>
+              <button class="food-chip" data-food="Idli Sambar">🥘 Idli Sambar</button>
+              <button class="food-chip" data-food="Roti with Sabzi">🫓 Roti + Sabzi</button>
+              <button class="food-chip" data-food="Masala Chai">☕ Masala Chai</button>
+              <button class="food-chip" data-food="Poha">🍜 Poha</button>
+              <button class="food-chip" data-food="Paneer Tikka">🧀 Paneer Tikka</button>
+              <button class="food-chip" data-food="Mango Lassi">🥛 Mango Lassi</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="foodAnalysisOutput" class="ai-output-card" style="display:none">
+        <div class="output-header">
+          <span><i class="bi bi-bar-chart-fill"></i> Nutritional Analysis</span>
+          <button class="btn-copy" id="copyAnalysisBtn"><i class="bi bi-clipboard"></i> Copy</button>
+        </div>
+        <div class="output-body" id="foodAnalysisContent"></div>
+      </div>
+
+      <div id="foodAnalysisLoader" class="loader-container" style="display:none">
+        <div class="ai-loader">
+          <div class="loader-dots"><span></span><span></span><span></span></div>
+          <p>Analysing nutritional content…</p>
         </div>
       </div>
     </section>
